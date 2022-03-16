@@ -41,6 +41,18 @@ func RangeQueryNumeric(field string, query map[string]interface{}, mappings *met
 	for k, v := range query {
 		k := strings.ToLower(k)
 		switch k {
+		case "from":
+			if include, ok := query["include_lower"].(bool); ok && include {
+				value.GTE = v.(float64)
+			} else {
+				value.GT = v.(float64)
+			}
+		case "to":
+			if include, ok := query["include_upper"].(bool); ok && include {
+				value.LTE = v.(float64)
+			} else {
+				value.LT = v.(float64)
+			}
 		case "gt":
 			value.GT = v.(float64)
 		case "gte":
@@ -55,6 +67,8 @@ func RangeQueryNumeric(field string, query map[string]interface{}, mappings *met
 			value.TimeZone = v.(string)
 		case "boost":
 			value.Boost = v.(float64)
+		case "include_lower", "include_upper":
+			continue
 		default:
 			return nil, errors.New(errors.ErrorTypeParsingException, fmt.Sprintf("[range] unknown field [%s]", k))
 		}
